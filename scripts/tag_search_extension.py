@@ -2,12 +2,15 @@ import os
 import sqlite3
 import gradio as gr
 from PIL import Image
+import modules.scripts as scripts
 from modules import script_callbacks, shared
 from modules.images import read_info_from_image
 from datetime import datetime
 import traceback
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tag_search.db")
+# Guarantee we get the extension root statically exactly at module load
+EXTENSION_ROOT = scripts.basedir()
+DB_PATH = os.path.join(EXTENSION_ROOT, "tag_search.db")
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -30,8 +33,8 @@ def get_last_indexed():
         row = c.fetchone()
         conn.close()
         return row[0] if row else "Never (or tracking not started)"
-    except Exception:
-        return "Never"
+    except Exception as e:
+        return f"Never (Err: {e})"
 
 def set_last_indexed():
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
