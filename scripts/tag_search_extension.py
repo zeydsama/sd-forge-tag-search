@@ -219,7 +219,7 @@ def on_ui_tabs():
                 
                 search_query = gr.Textbox(label="Search Query", placeholder="green hair, -nsfw")
                 
-                                gr.HTML('''
+                gr.HTML('''
                 <style>
                     #dummy_date_from, #dummy_date_to { display: none !important; }
                 </style>
