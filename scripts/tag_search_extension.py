@@ -219,20 +219,23 @@ def on_ui_tabs():
                 
                 search_query = gr.Textbox(label="Search Query", placeholder="green hair, -nsfw")
                 
-                gr.HTML('''
+                                gr.HTML('''
+                <style>
+                    #dummy_date_from, #dummy_date_to { display: none !important; }
+                </style>
                 <div style="display: flex; gap: 15px; margin-top: 10px; margin-bottom: 10px;">
                     <div style="flex: 1;">
                         <span style="font-size: 0.9em; opacity: 0.8; display: block; margin-bottom: 4px;">From Date</span>
-                        <input type="date" id="ts_date_from" style="width: 100%; box-sizing: border-box; padding: 6px; border-radius: 6px; border: 1px solid var(--border-color-primary, #ccc); background: var(--input-background-fill, #fff); color: var(--body-text-color, #000);">
+                        <input type="date" id="ts_date_from" onchange="let el = document.querySelector('#dummy_date_from textarea') || document.querySelector('#dummy_date_from input'); if(el) { el.value = this.value; el.dispatchEvent(new Event('input', {bubbles: true})); }" style="width: 100%; box-sizing: border-box; padding: 6px; border-radius: 6px; border: 1px solid var(--border-color-primary, #ccc); background: var(--input-background-fill, #fff); color: var(--body-text-color, #000);">
                     </div>
                     <div style="flex: 1;">
                         <span style="font-size: 0.9em; opacity: 0.8; display: block; margin-bottom: 4px;">To Date</span>
-                        <input type="date" id="ts_date_to" style="width: 100%; box-sizing: border-box; padding: 6px; border-radius: 6px; border: 1px solid var(--border-color-primary, #ccc); background: var(--input-background-fill, #fff); color: var(--body-text-color, #000);">
+                        <input type="date" id="ts_date_to" onchange="let el = document.querySelector('#dummy_date_to textarea') || document.querySelector('#dummy_date_to input'); if(el) { el.value = this.value; el.dispatchEvent(new Event('input', {bubbles: true})); }" style="width: 100%; box-sizing: border-box; padding: 6px; border-radius: 6px; border: 1px solid var(--border-color-primary, #ccc); background: var(--input-background-fill, #fff); color: var(--body-text-color, #000);">
                     </div>
                 </div>
                 ''')
-                dummy_date_from = gr.Textbox(visible=False, elem_id="dummy_date_from")
-                dummy_date_to = gr.Textbox(visible=False, elem_id="dummy_date_to")
+                dummy_date_from = gr.Textbox(visible=True, elem_id="dummy_date_from")
+                dummy_date_to = gr.Textbox(visible=True, elem_id="dummy_date_to")
                     
                 sort_order = gr.Dropdown(label="Sort By", choices=["Newest First", "Oldest First"], value="Newest First")
                 search_btn = gr.Button("Search Images", variant="primary")
@@ -258,10 +261,8 @@ def on_ui_tabs():
         # Events
         inputs_search = [search_query, sort_order, dummy_date_from, dummy_date_to]
         
-        js_fetch_dates = "function(q, sort, f, t) { let df = document.getElementById('ts_date_from'); let dt = document.getElementById('ts_date_to'); return [q, sort, df ? df.value : '', dt ? dt.value : '']; }"
-        
-        search_btn.click(fn=search_db, _js=js_fetch_dates, inputs=inputs_search, outputs=[results_gallery, search_results_state])
-        search_query.submit(fn=search_db, _js=js_fetch_dates, inputs=inputs_search, outputs=[results_gallery, search_results_state])
+        search_btn.click(fn=search_db, inputs=inputs_search, outputs=[results_gallery, search_results_state])
+        search_query.submit(fn=search_db, inputs=inputs_search, outputs=[results_gallery, search_results_state])
         
         # When gallery is clicked, pull details from DB based on state
         results_gallery.select(fn=get_image_details, inputs=[search_results_state], outputs=[detail_pos, detail_neg])
