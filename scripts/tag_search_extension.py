@@ -258,7 +258,7 @@ def on_ui_tabs():
         # Events
         inputs_search = [search_query, sort_order, dummy_date_from, dummy_date_to]
         
-        js_fetch_dates = "function(q, sort, f, t) { let df = document.getElementById('ts_date_from'); let dt = document.getElementById('ts_date_to'); return [q, sort, df ? df.value : '', dt ? dt.value : '']; }""
+        js_fetch_dates = "function(q, sort, f, t) { let df = document.getElementById('ts_date_from'); let dt = document.getElementById('ts_date_to'); return [q, sort, df ? df.value : '', dt ? dt.value : '']; }"
         
         search_btn.click(fn=search_db, _js=js_fetch_dates, inputs=inputs_search, outputs=[results_gallery, search_results_state])
         search_query.submit(fn=search_db, _js=js_fetch_dates, inputs=inputs_search, outputs=[results_gallery, search_results_state])
