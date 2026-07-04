@@ -197,9 +197,20 @@ def on_ui_tabs():
                 
                 search_query = gr.Textbox(label="Search Query", placeholder="green hair, -nsfw")
                 
-                with gr.Row():
-                    date_from = gr.Textbox(label="From Date", placeholder="YYYY-MM-DD", scale=1)
-                    date_to = gr.Textbox(label="To Date", placeholder="YYYY-MM-DD", scale=1)
+                gr.HTML('''
+                <div style="display: flex; gap: 15px; margin-top: 10px; margin-bottom: 10px;">
+                    <div style="flex: 1;">
+                        <span style="font-size: 0.9em; opacity: 0.8; display: block; margin-bottom: 4px;">From Date</span>
+                        <input type="date" id="ts_date_from" style="width: 100%; box-sizing: border-box; padding: 6px; border-radius: 6px; border: 1px solid var(--border-color-primary, #ccc); background: var(--input-background-fill, #fff); color: var(--body-text-color, #000);">
+                    </div>
+                    <div style="flex: 1;">
+                        <span style="font-size: 0.9em; opacity: 0.8; display: block; margin-bottom: 4px;">To Date</span>
+                        <input type="date" id="ts_date_to" style="width: 100%; box-sizing: border-box; padding: 6px; border-radius: 6px; border: 1px solid var(--border-color-primary, #ccc); background: var(--input-background-fill, #fff); color: var(--body-text-color, #000);">
+                    </div>
+                </div>
+                ''')
+                dummy_date_from = gr.Textbox(visible=False, elem_id="dummy_date_from")
+                dummy_date_to = gr.Textbox(visible=False, elem_id="dummy_date_to")
                     
                 sort_order = gr.Dropdown(label="Sort By", choices=["Newest First", "Oldest First"], value="Newest First")
                 search_btn = gr.Button("Search Images", variant="primary")
@@ -223,9 +234,18 @@ def on_ui_tabs():
                 results_gallery = gr.Gallery(label="Results", show_label=True, elem_id="tag_search_results", columns=5, height=800, object_fit="contain")
 
         # Events
-        inputs_search = [search_query, sort_order, date_from, date_to]
-        search_btn.click(fn=search_db, inputs=inputs_search, outputs=[results_gallery, search_results_state])
-        search_query.submit(fn=search_db, inputs=inputs_search, outputs=[results_gallery, search_results_state])
+        inputs_search = [search_query, sort_order, dummy_date_from, dummy_date_to]
+        
+        js_fetch_dates = '''
+        function(q, sort_order, d_from, d_to) {
+            let f = document.getElementById('ts_date_from');
+            let t = document.getElementById('ts_date_to');
+            return [q, sort_order, f ? f.value : '', t ? t.value : ''];
+        }
+        '''
+        
+        search_btn.click(fn=search_db, _js=js_fetch_dates, inputs=inputs_search, outputs=[results_gallery, search_results_state])
+        search_query.submit(fn=search_db, _js=js_fetch_dates, inputs=inputs_search, outputs=[results_gallery, search_results_state])
         
         # When gallery is clicked, pull details from DB based on state
         results_gallery.select(fn=get_image_details, inputs=[search_results_state], outputs=[detail_pos, detail_neg])
