@@ -95,10 +95,10 @@ def search_db(query, sort_order, date_from, date_to):
             base_query += ' AND (positive LIKE ? OR negative LIKE ?)'
             params.extend([f'%{tag}%', f'%{tag}%'])
             
-    if date_from and date_from.strip():
+    if date_from and date_from.strip() and date_from not in ("undefined", "null"):
         base_query += ' AND timestamp >= ?'
         params.append(f'{date_from.strip()} 00:00:00')
-    if date_to and date_to.strip():
+    if date_to and date_to.strip() and date_to not in ("undefined", "null"):
         base_query += ' AND timestamp <= ?'
         params.append(f'{date_to.strip()} 23:59:59')
             
@@ -258,13 +258,7 @@ def on_ui_tabs():
         # Events
         inputs_search = [search_query, sort_order, dummy_date_from, dummy_date_to]
         
-        js_fetch_dates = '''
-        function(q, sort_order, d_from, d_to) {
-            let f = document.getElementById('ts_date_from');
-            let t = document.getElementById('ts_date_to');
-            return [q, sort_order, f ? f.value : '', t ? t.value : ''];
-        }
-        '''
+        js_fetch_dates = "function(q, sort, f, t) { let df = document.getElementById('ts_date_from'); let dt = document.getElementById('ts_date_to'); return [q, sort, df ? df.value : '', dt ? dt.value : '']; }""
         
         search_btn.click(fn=search_db, _js=js_fetch_dates, inputs=inputs_search, outputs=[results_gallery, search_results_state])
         search_query.submit(fn=search_db, _js=js_fetch_dates, inputs=inputs_search, outputs=[results_gallery, search_results_state])
