@@ -58,6 +58,24 @@ def add_image_to_db(filepath, positive, negative, timestamp=None):
     except Exception as e:
         print(f"[Tag Search] DB Insert error: {e}")
 
+
+def allow_folder_for_paths(paths):
+    try:
+        from modules import shared
+        demo = getattr(shared, "demo", None)
+        if demo is None:
+            return
+            
+        if not hasattr(demo, "allowed_paths"):
+            demo.allowed_paths = []
+            
+        unique_dirs = set(os.path.abspath(os.path.dirname(p)) for p in paths)
+        for d in unique_dirs:
+            if d not in demo.allowed_paths:
+                demo.allowed_paths.append(d)
+    except Exception as e:
+        print(f"[Tag Search] Path permission error: {e}")
+
 def search_db(query, sort_order, date_from, date_to):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -98,6 +116,7 @@ def search_db(query, sort_order, date_from, date_to):
             results.append(path)
             
     conn.close()
+    allow_folder_for_paths(results)
     return results, results
 
 def extract_tags(text):
